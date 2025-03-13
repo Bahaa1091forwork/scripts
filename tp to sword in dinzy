@@ -1,7 +1,10 @@
 -- Create the GUI and Teleport Button
 local player = game.Players.LocalPlayer
+
+-- Make the GUI parented to StarterPlayerScripts so it doesn't reset on death
+local playerScripts = player:WaitForChild("PlayerScripts")
 local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.Parent = playerScripts
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 200, 0, 100)
