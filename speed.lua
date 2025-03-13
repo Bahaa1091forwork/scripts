@@ -6,7 +6,7 @@ gui.ResetOnSpawn = false  -- Keeps the GUI after respawning
 -- Create Main Frame (Draggable)
 local frame = Instance.new("Frame")
 frame.Parent = gui
-frame.Size = UDim2.new(0.3, 0, 0.2, 0)
+frame.Size = UDim2.new(0.4, 0, 0.2, 0)
 frame.Position = UDim2.new(0.35, 0, 0.4, 0)
 frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 frame.Active = true
