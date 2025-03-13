@@ -1,0 +1,58 @@
+-- Create the GUI and Teleport Button
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0.5, -100, 0.5, -50)  -- Center the frame
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Parent = screenGui
+
+local teleportButton = Instance.new("TextButton")
+teleportButton.Size = UDim2.new(0, 180, 0, 50)
+teleportButton.Position = UDim2.new(0, 10, 0, 25)
+teleportButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+teleportButton.Text = "Teleport to Position"
+teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.Font = Enum.Font.SourceSans
+teleportButton.TextSize = 24
+teleportButton.Parent = frame
+
+-- Teleport function
+local function teleportPlayerToPosition()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        -- Teleports to the specific position
+        character.HumanoidRootPart.CFrame = CFrame.new(3378.454345703125, 2785.717041015625, 70.21392822265625)
+    end
+end
+
+-- Button click event to teleport
+teleportButton.MouseButton1Click:Connect(teleportPlayerToPosition)
+
+-- Draggable GUI code
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
