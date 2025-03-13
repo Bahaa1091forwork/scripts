@@ -1,61 +1,90 @@
--- Create the GUI and Teleport Button
 local player = game.Players.LocalPlayer
 
--- Make the GUI parented to StarterPlayerScripts so it doesn't reset on death
-local playerScripts = player:WaitForChild("PlayerScripts")
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = playerScripts
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0.5, -100, 0.5, -50)  -- Center the frame
-frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-frame.Parent = screenGui
-
-local teleportButton = Instance.new("TextButton")
-teleportButton.Size = UDim2.new(0, 180, 0, 50)
-teleportButton.Position = UDim2.new(0, 10, 0, 25)
-teleportButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-teleportButton.Text = "Teleport to Position"
-teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportButton.Font = Enum.Font.SourceSans
-teleportButton.TextSize = 24
-teleportButton.Parent = frame
-
--- Teleport function
-local function teleportPlayerToPosition()
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        -- Teleports to the specific position
-        character.HumanoidRootPart.CFrame = CFrame.new(3378.454345703125, 2785.717041015625, 70.21392822265625)
+-- Function to create the GUI
+local function createGui()
+    -- Check if the GUI already exists, if not create it
+    local existingGui = player:WaitForChild("PlayerGui"):FindFirstChild("TeleportGui")
+    if existingGui then
+        return -- If GUI already exists, don't recreate
     end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "TeleportGui"
+    gui.Parent = player:WaitForChild("PlayerGui")
+    gui.ResetOnSpawn = false  -- Keep GUI after respawn
+
+    -- Create Main Frame (Draggable)
+    local frame = Instance.new("Frame")
+    frame.Parent = gui
+    frame.Size = UDim2.new(0.2, 0, 0.2, 0)  -- Smaller size (adjusted)
+    frame.Position = UDim2.new(0.4, 0, 0.4, 0)  -- Slightly centered
+    frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    frame.Active = true
+    frame.Draggable = true  -- Makes the GUI draggable
+
+    -- Title Label
+    local text = Instance.new("TextLabel")
+    text.Parent = frame
+    text.Size = UDim2.new(1, 0, 0.2, 0)
+    text.Position = UDim2.new(0, 0, 0, 0)  
+    text.Text = "Teleport Button"
+    text.TextSize = 18  -- Slightly smaller text
+    text.BackgroundColor3 = Color3.new(0, 0, 0)
+    text.TextColor3 = Color3.new(1, 1, 1)
+
+    -- Button to Teleport to specific coordinates
+    local teleportButton = Instance.new("TextButton")
+    teleportButton.Parent = frame
+    teleportButton.Size = UDim2.new(0.8, 0, 0.3, 0)
+    teleportButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+    teleportButton.Text = "Teleport to Position"
+    teleportButton.TextSize = 16  -- Slightly smaller text
+    teleportButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    -- Teleport function to move player to the position
+    local function teleportPlayerToPosition()
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        -- Teleport the character to the given coordinates
+        humanoidRootPart.CFrame = CFrame.new(3378.454345703125, 2785.717041015625, 70.21392822265625)
+    end
+
+    -- Connect teleport button to function
+    teleportButton.MouseButton1Click:Connect(teleportPlayerToPosition)
+
+    -- Draggable functionality for the frame
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    frame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
 end
 
--- Button click event to teleport
-teleportButton.MouseButton1Click:Connect(teleportPlayerToPosition)
-
--- Draggable GUI code
-local dragging = false
-local dragStart = nil
-local startPos = nil
-
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-    end
+-- Ensure GUI stays across respawns
+player.CharacterAdded:Connect(function()
+    -- Re-create the GUI if not already created
+    createGui()
 end)
 
-frame.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-frame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+-- Initial GUI creation (if not already created)
+createGui()
